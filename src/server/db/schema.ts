@@ -103,3 +103,16 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, { fields: [session.userId], references: [user.id] }),
 }));
+
+export const anonymousUploads = createTable(
+  "anonymous_upload",
+  (d) => ({
+    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+    identifier: d.varchar({ length: 256 }).notNull(), // e.g., hashed IP address
+    uploadCount: d.integer().notNull().default(0),
+    date: d.timestamp({ withTimezone: true }).notNull(),
+  }),
+  (t) => [
+    index("identifier_date_idx").on(t.identifier, t.date),
+  ],
+);

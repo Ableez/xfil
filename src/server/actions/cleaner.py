@@ -1187,6 +1187,11 @@ Output Coloring: Use --no-color to disable. Respects NO_COLOR env var.
 
     parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
 
+    parser.add_argument(
+        "--json-options",
+        help="JSON string with processing options.",
+    )
+
     return parser
 
 
@@ -1216,11 +1221,16 @@ def main(argv: Optional[List[str]] = None) -> None:  # noqa: C901 (long, but str
     excluded_chars = _parse_excluded_chars(args.excluded_chars_str, log)
 
     # -- Detector instance --
+    import json
+    options = {}
+    if args.json_options:
+        options = json.loads(args.json_options)
+
     detector = UnicodeMarkerDetector(
-        clean_file=args.clean,
-        check_typographic=args.check_typographic,
-        check_ivs=args.check_ivs,
-        exclude_word_chars=args.word,
+        clean_file=options.get("mode") in ["correct", "both"],
+        check_typographic=options.get("validation", {}).get("verifyStructure"),
+        check_ivs=False, # Not implemented in the UI
+        exclude_word_chars=False, # Not implemented in the UI
         user_excluded_chars=excluded_chars,
         report_mode=args.report_mode,
         logger=log,
